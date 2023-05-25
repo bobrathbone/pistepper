@@ -27,5 +27,3 @@ Un-tar the file with the following command:
 tar -xvf pi_stepper_motor.tar.gz
 
 This will unzip the files
-
-

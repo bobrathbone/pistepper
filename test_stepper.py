@@ -2,11 +2,12 @@
 #
 # Raspberry Pi Dual Stepper Motor test driver
 # Author : Bob Rathbone
-# $Id: test_stepper.py,v 1.1 2013/12/06 11:27:52 bob Exp $
+# $Id: test_stepper.py,v 1.2 2023/05/23 09:36:51 bob Exp $
 # Site   : http://www.bobrathbone.com
 #
 # Based on code from ModMyPi
 # https://www.modmypi.com/step-your-pi
+# Hardware 28BYJ-48 Stepper motor (Unipolar)
 #
 
 # -*- coding: utf-8 -*-

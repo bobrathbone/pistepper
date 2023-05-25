@@ -1,0 +1,42 @@
+Raspberry Pi Stepper Motor Project
+==================================
+Version 2.0 (Converted to Python)
+
+This project has been designed to help students or hobbyists get started with driving stepper motors on the Raspberry PI. It covers two types of stepper motor namely unipolar and bipolar. 
+
+It includes code to either drive eitheR 
+  • One or two x 5-Wire "28BYJ-48" stepper Motor (bipolar motor) with ULN2803A driver
+Or
+  • A 12-volt #324 (Nema17) high torque stepper motor (unipolar motor) with H-Driver circuit
+
+File name               Driver Class            Type        Description
+=========               ============            ========    ===========
+test_unipolar_class.py  unipolar_class.py       Unipolar    28BYJ-48 stepper dual motor driver
+single_motor.py         unipolar_class.py       Unipolar    28BYJ-48 stepper single motor
+test_motor_i2c_class.py test_motor_i2c_class.py Unipolar    28BYJ-48 stepper motor I2C driver 
+test_position.py        unipolar_class.py       Unipolar    28BYJ-48 test position setting
+motord.py               motor_daemon.py         Unipolar    28BYJ-48 background daemon
+log_class.py            n/a                     n/a         Logging class for motord.py
+test_nema17.py          bipolar_class.py        Bipolar     Nema17 stepper motor driver
+test_26_ema17.py        bipolar_class.py        Bipolar     Nema17 driver 26-pin header
+test_motor_i2c_class.py motor_i2c_class.py      Unipolar    I2C 28BYJ-48 stepper dual motor driver (1)
+
+More details can be found at :
+
+https://bobrathbone.com/raspberrypi/stepper_motor.html 
+
+Software can be dowloaded and ionstalled  with the following:
+
+Create a directory called /home/pi/stepper. Copy the pi_stepper_motor.tar.gz to the /home/pi/stepper directory or use wget to download it.
+
+    wget http://www.bobrathbone.com/raspberrypi/packages/pi_stepper_motor.tar.gz
+
+Un-tar the file with the following command:
+
+tar -xvf pi_stepper_motor.tar.gz
+
+This will unzip the files
+
+
+
+

@@ -1,61 +1,101 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
-# Raspberry Pi Unipolar Stepper Motor test motor_class.py
+# Raspberry Pi Dual Stepper Motor test bipolar_class.py
 # Author : Bob Rathbone
-# $Id: test_unipolar_class.py,v 1.3 2014/03/04 07:19:11 bob Exp $
+# $Id: test_unipolar_class.py,v 1.6 2023/05/23 09:30:19 bob Exp $
 # Site   : http://www.bobrathbone.com
 #
+# Hardware 28BYJ-48 Stepper motor (unipolar) - Dual motor A and B test
+# Motor driven  by a ULN2803A Eight Darlington outputs Driver Chip
+# Uses the unipolar_class.py low level driver
+
 import os
 import time
 import atexit
 from unipolar_class import Motor
 
-# Unipolar Motor BCM GPIO definitions
-direction = 04
-enable = 25
-step = 24
-ms1 = 23
-ms2 = 22
-ms3 = 27
+motora = Motor(17,18,27,22)
+motorb = Motor(4,25,24,23)
+minute = 60
 
-motora = Motor(step,direction,enable,ms1,ms2,ms3)
 motora.init()
+motorb.init()
 
 def finish():
-	motora.stop()
-	return
+    motora.stop()
+    motorb.stop()
+    return
 
 atexit.register(finish)
 
-# Get the number of steps per revoltion
-count = 3
+motora.lock()
+motorb.lock()
+
+print ("revolution = " + str(Motor.REVOLUTION))
+print (str(motora.goto(200)))
+time.sleep(2)
+print (str(motora.goto(100)))
+time.sleep(2)
+print (str(motora.goto(900)))
+time.sleep(2)
+
+speed = Motor.NORMAL
+
+# Uncomment for setting step type
+#motora.setHalfStepDrive()
+#motora.setFullStepDrive()
+#motora.setWaveDrive()
+
+count = 30
 while count > 0:
-	print "Motor A Clockwise Full step"
-	revolution = motora.setStepSize(Motor.FULL)
-	motora.turn(revolution*3, Motor.CLOCKWISE)
-	count -= 1
-	time.sleep(1)
+    print ("Motor A Clockwise step")
+    motora.turn(Motor.STEP, Motor.CLOCKWISE)
+    count -= 1
+    time.sleep(0.1)
 
-count = 3
+count = 30
 while count > 0:
-	print "Motor A Anticlockwise Full step"
-	revolution = motora.setStepSize(Motor.FULL)
-	motora.turn(revolution*1, Motor.ANTICLOCKWISE)
-	count -= 1
-	time.sleep(1)
+    print ("Motor A Anticlockwise step")
+    motora.turn(Motor.STEP*2, Motor.ANTICLOCKWISE)
+    count -= 1
+    time.sleep(0.1)
 
-	print "Motor A Clockwise Sixteenth step"
-	revolution = motora.setStepSize(Motor.SIXTEENTH)
-	motora.turn(revolution/2, Motor.CLOCKWISE)
-	time.sleep(1)
+while True:
+    print ("Motor A Clockwise")
+    t1 = time.time()
+    motora.turn(1*Motor.REVOLUTION, Motor.CLOCKWISE)
+    t2 = time.time()
+    print ("time " + str(t2-t1))
+    motora.lock()
+    time.sleep(1)
 
-revolution = motora.getRevolution()
-print "revolution = " + str(revolution)
-print str(motora.goto(revolution/4))
-time.sleep(2)
-print str(motora.goto((revolution/4)*3))
-time.sleep(2)
-print str(motora.goto(revolution/2))
-time.sleep(2)
+    print ("Motor A Anti-Clockwise")
+    t1 = time.time()
+    motora.turn(1*Motor.REVOLUTION, Motor.ANTICLOCKWISE)
+    t2 = time.time()
+    print ("time " + str(t2-t1))
+    motora.lock()
+    time.sleep(1)
+
+    print ("Motor B Clockwise")
+    t1 = time.time()
+    motorb.turn(1*Motor.REVOLUTION, Motor.CLOCKWISE)
+    t2 = time.time()
+    print ("time " + str(t2-t1))
+
+    print ("Motor B Anti-Clockwise")
+    t1 = time.time()
+    motorb.turn(1*Motor.REVOLUTION, Motor.ANTICLOCKWISE)
+    t2 = time.time()
+    print ("time " + str(t2-t1))
+    motorb.lock()
+    time.sleep(5)
+
+    if speed == Motor.NORMAL:
+        speed = Motor.SLOW
+    else:
+        speed = Motor.NORMAL
+    motora.setSpeed(speed)
+
 
 # End of program

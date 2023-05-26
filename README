@@ -4,7 +4,7 @@ Version 2.0 (Converted to Python)
 
 This project has been designed to help students or hobbyists get started with driving stepper motors on the Raspberry PI. It covers two types of stepper motor namely unipolar and bipolar. 
 
-It includes code to either drive eitheR 
+It includes code to either drive either 
   • One or two x 5-Wire "28BYJ-48" stepper Motor (bipolar motor) with ULN2803A driver
 Or
   • A 12-volt #324 (Nema17) high torque stepper motor (unipolar motor) with H-Driver circuit

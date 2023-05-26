@@ -16,7 +16,7 @@ More details can be found at :
 
 https://bobrathbone.com/raspberrypi/stepper_motor.html
 
-Software can be dowloaded and ionstalled  with the following:
+Software can be dowloaded and installed  with the following:
 
 Create a directory called /home/pi/stepper. Copy the pi_stepper_motor.tar.gz to the /home/pi/stepper directory or use wget to download it.
 
@@ -24,8 +24,8 @@ Create a directory called /home/pi/stepper. Copy the pi_stepper_motor.tar.gz to 
 
 Un-tar the file with the following command:
 
-tar -xvf pi_stepper_motor.tar.gz
+    tar -xvf pi_stepper_motor.tar.gz
 
-This will unzip the files
+This will unzip the files to the /home/pi/stepper directory.
 
 

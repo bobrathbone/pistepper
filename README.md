@@ -1,8 +1,6 @@
-
-
 Raspberry Pi Stepper Motor Project pistepper
 ============================================
-Version 2.0 (Converted to Python)
+Version 2.0 (Converted to Python 3)
 
 This project has been designed to help students or hobbyists get started with driving stepper motors on the Raspberry PI. It covers two types of stepper motor namely unipolar and bipolar.
 

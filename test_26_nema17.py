@@ -2,7 +2,7 @@
 #
 # Raspberry Pi Unipolar Stepper Motor test bipolar_class.py
 # Author : Bob Rathbone
-# $Id: test_26_nema17.py,v 1.1 2023/05/24 11:14:37 bob Exp $
+# $Id: test_26_nema17.py,v 1.2 2023/05/28 07:35:49 bob Exp $
 # Site   : http://www.bobrathbone.com
 #
 # NEMA-17 unipolar stepper motor test 
@@ -16,7 +16,7 @@ from bipolar_class import Motor
 # NEMA-17 Unipolar Motor BCM GPIO definitions
 # Comment out the incorrect definition and un-comment the correct one 
 
-# 26 pin header for older Raspberry Pi's            
+# GPIO assignments for 26-pin header for older Raspberry Pi's            
 step = 24
 direction = 4
 enable = 25
@@ -24,14 +24,14 @@ ms1 = 23
 ms2 = 22
 ms3 = 27
 
-# 40 pin header for newer Raspberry Pi's            
+# GPIO assignments for 40-pin header for newer Raspberry Pi's            
 """
-step = 20
-direction = 21
-enable = 25	# Not used - backward compatability only
-ms1 = 14
+step = 21
+direction = 20
+enable = 25     # Not required - leave unconnected
+ms1 = 18
 ms2 = 15
-ms3 = 18
+ms3 = 14
 """
 
 motora = Motor(step,direction,enable,ms1,ms2,ms3)

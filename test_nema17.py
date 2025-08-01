@@ -2,7 +2,7 @@
 #
 # Raspberry Pi bipolar Stepper Motor test bipolar_class.py
 # Author : Bob Rathbone
-# $Id: test_nema17.py,v 1.5 2023/05/28 07:35:49 bob Exp $
+# $Id: test_nema17.py,v 1.6 2023/05/30 16:44:49 bob Exp $
 # Site   : http://www.bobrathbone.com
 #
 # NEMA-17 bipolar stepper motor test 
@@ -74,4 +74,11 @@ time.sleep(2)
 print (str(motora.goto(revolution/2)))
 time.sleep(2)
 
-# End of program
+# Reset the motor otherwise it will become hot
+motora.reset()
+
+# End of test program
+
+# set tabstop=4 shiftwidth=4 expandtab
+# retab
+

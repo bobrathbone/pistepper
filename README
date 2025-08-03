@@ -3,7 +3,8 @@ Raspberry Pi Stepper Motor Project
 
 Date            Version     Details
 ----            -------     -------
-29 July 2025	2.2	    Installation acomplished using GitHub repository
+3 August 2025   2.3         bipolar_class.py (RPi.GPIO) converted to bipolar_lgpio_class.py
+29 July 2025    2.2         Installation acomplished using GitHub repository
 28 May 2023     2.1         Corrected GPIO pin assignments for 40-pin header
 25 May 2023     2.0         Converted to Python 3
 
@@ -24,7 +25,9 @@ motord.py               motor_daemon.py         Unipolar    28BYJ-48 background 
 log_class.py            n/a                     n/a         Logging class for motord.py
 test_nema17.py          bipolar_class.py        Bipolar     Nema17 stepper motor driver
 test_26_ema17.py        bipolar_class.py        Bipolar     Nema17 driver 26-pin header
-test_motor_i2c_class.py motor_i2c_class.py      Unipolar    I2C 28BYJ-48 stepper dual motor driver (1)
+See __main__ in class   bipolar_lgpio_class.py  Bipolar     Nema17 driver using Python3 lgpio
+test_motor_i2c_class.py motor_i2c_class.py      Unipolar    I2C 28BYJ-48 stepper dual motor driver
+
 
 More details can be found at :
 

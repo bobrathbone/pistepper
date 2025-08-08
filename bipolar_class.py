@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# $Id: bipolar_class.py,v 1.7 2025/08/02 13:56:45 bob Exp $
+# $Id: bipolar_class.py,v 1.8 2025/08/05 07:00:11 bob Exp $
 # Raspberry Pi bipolar Stepper Motor Driver Class
 # Hardware Nema17 12 Volt Stepper High Torque Motor
 # Gear Reduction Ratio: 1/64 
@@ -92,7 +92,6 @@ class Motor:
     def turn(self,steps,direction):
         count = steps
         GPIO.output(self.enable,ENABLE)
-        GPIO.output(self.direction,direction)
         while count > 0:
             GPIO.output(self.step,GPIO.HIGH)
             time.sleep(self.pulse)
@@ -106,15 +105,7 @@ class Motor:
         self.halt = True
         return
 
-    # Increment current position 
-    def incrementPosition(self):
-        return
-
-    # Increment current position 
-    def decrementPosition(self):
-        return 
-
-    # Increment current position 
+    # set current position as 0 
     def zeroPosition(self):
         self.position = 0
         return self.position

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# $Id: bipolar_lgpio_class.py,v 1.5 2025/08/03 11:57:32 bob Exp $
+# $Id: bipolar_lgpio_class.py,v 1.8 2025/08/08 10:29:22 bob Exp $
 # Raspberry Pi bipolar Stepper Motor Driver Class
 # Hardware Nema17 12 Volt Stepper High Torque Motor
 # Gear Reduction Ratio: 1/64 
@@ -25,7 +25,7 @@ import lgpio
 
 # Step resolution (The last column is the multiplier for one revolution)
 # The first three parameters are the settings for ms1, ms2 and ms3 windings respectively 
-FullStep = [0,0,0,1]
+FullStep = [0,0,0,1]        
 HalfStep = [1,0,0,2]
 QuarterStep = [0,1,0,4]
 EighthStep = [1,1,0,8]
@@ -42,15 +42,19 @@ class Motor:
     ANTICLOCKWISE = 1
 
     # Step sizes (Don't change values)
-    FULL = 1
-    HALF = 2
-    QUARTER = 4
-    EIGHTH = 8
-    SIXTEENTH = 16
+    FULL = 1        # 200 steps
+    HALF = 2        # 400 steps
+    QUARTER = 4     # 800 steps
+    EIGHTH = 8      # 1600 steps
+    SIXTEENTH = 16  # 3200 steps
 
     pulse=0.0007
     interval=0.0007
-    oneRevolution = STEPS
+    oneRevolution = STEPS # If FULL step size
+    position = 1    # Current position (200 x stepsize)
+    debug = False   # Print debug statements
+
+    sDirection = ("CLOCKWISE","ANTICLOCKWISE")
 
     def __init__(self, step, direction, enable, ms1, ms2, ms3):
         self.step = step
@@ -70,7 +74,7 @@ class Motor:
         lgpio.gpio_claim_output(self.chip,self.ms1,lgpio.SET_PULL_UP)
         lgpio.gpio_claim_output(self.chip,self.ms2,lgpio.SET_PULL_UP)
         lgpio.gpio_claim_output(self.chip,self.ms3,lgpio.SET_PULL_UP)
-        self.zeroPosition()
+        self.startPosition()
         self.setStepSize(self.FULL)
         return  
 
@@ -114,9 +118,12 @@ class Motor:
 
     # Turn the motor
     def turn(self,steps,direction):
+        if self.debug:
+            print("Turn steps=%d %s revolution=%d position=%d" % 
+                  (steps,self.sDirection[direction],self.oneRevolution,self.position))
         count = steps
-        lgpio.gpio_write(self.chip,self.enable,HIGH)
         lgpio.gpio_write(self.chip,self.direction,direction)
+        lgpio.gpio_write(self.chip,self.enable,HIGH)
         while count > 0:
             lgpio.gpio_write(self.chip,self.step,HIGH)
             time.sleep(self.pulse)
@@ -124,7 +131,19 @@ class Motor:
             time.sleep(self.interval)
             count -= 1
         lgpio.gpio_write(self.chip,self.enable,LOW)
-        return
+
+        # Calculate new position
+        if direction == self.CLOCKWISE:
+            self.position = self.position + steps 
+            while self.position > self.oneRevolution:
+                self.position -= self.oneRevolution 
+        else:  # ANTICLOCKWISE
+            self.position = self.position - steps 
+            while self.position < 1:
+                self.position += self.oneRevolution 
+        if self.debug:
+            print("New position=%d" % self.position)
+        return self.position
 
     def interrupt(self):
         self.halt = True
@@ -133,24 +152,20 @@ class Motor:
     def close(self):
         lgpio.gpiochip_close(self.chip)
 
-    # Increment current position 
-    def incrementPosition(self):
-        return
+    # Set starting position (1)
+    def startPosition(self):
+        self.position = 1
+        return self.position
 
-    # Increment current position 
-    def decrementPosition(self):
-        return 
-
-    # Increment current position 
-    def zeroPosition(self):
-        self.position = 0
+    def getPosition(self):
         return self.position
 
     # Goto a specific position
-    def goto(self, position):
+    def goto(self,position=0,stepsize=FULL):
+        self.setStepSize(stepsize)
         newpos = position
         while newpos > self.oneRevolution:
-                newpos -= self.oneRevolution
+            newpos -= self.oneRevolution
 
         delta =  newpos - self.position
 
@@ -173,7 +188,6 @@ class Motor:
         if self.position == self.oneRevolution:
                 self.position = 0
         return self.position
-
 
     # Stop the motor (calls reset)
     def stop(self):
@@ -201,11 +215,12 @@ class Motor:
         self.oneRevolution = steps
         return self.oneRevolution
 
-
     # Get number of revolution steps
     def getRevolution(self):
         return self.oneRevolution
         
+    def setDebug(self,level):
+        self.debug = level
 
 # End of Unipolar Motor class
 
@@ -219,34 +234,67 @@ if __name__ == '__main__':
     ms2 = 15
     ms3 = 14
     motora = Motor(step,direction,enable,ms1,ms2,ms3) 
-    print("direction",direction)
-    print("enable",enable)
-    print("ms1",ms1)
-    print("ms2",ms2)
-    print("ms3",ms3)
+    print("Test Neva17 bipolar motor")
+    print("GPIO settings")
+    print("  direction",direction)
+    print("  enable",enable)
+    print("  ms1",ms1)
+    print("  ms2",ms2)
+    print("  ms3",ms3)
+
+    # Initialise motor (Sets current position as 0)
     motora.init()
 
-    # Get the number of steps per revoltion
-    count = 3
-    while count > 0:
-        print ("Motor A Clockwise Full step")
-        revolution = motora.setStepSize(Motor.FULL)
-        motora.turn(revolution*3, Motor.CLOCKWISE)
-        count -= 1
-        time.sleep(1)
+    # Set debug to True or False
+    motora.setDebug(True)
 
-    count = 3
-    while count > 0:
-        print ("Motor A Anticlockwise Full step")
-        revolution = motora.setStepSize(Motor.FULL)
-        motora.turn(revolution*1, Motor.ANTICLOCKWISE)
-        count -= 1
-        time.sleep(1)
+    # Set the motor to step size FULL (1) 
+    print ("Motor A Clockwise FULL step")
+    revolution = motora.setStepSize(Motor.FULL)
+    motora.turn(revolution, Motor.CLOCKWISE)
+    time.sleep(2)
+   
+    print ("Motor A Anti-clockwise FULL step")
+    motora.turn(revolution, Motor.ANTICLOCKWISE)
+    time.sleep(2)
 
-        print ("Motor A Clockwise Sixteenth step")
-        revolution = motora.setStepSize(Motor.SIXTEENTH)
-        motora.turn(revolution/2, Motor.CLOCKWISE)
-        time.sleep(1)
+    print ("Motor A Clockwise 3 revolutions FULL step")
+    motora.turn(revolution*3, Motor.CLOCKWISE)
+    time.sleep(1)
+
+    print ("Motor A Anticlockwise FULL step")
+    motora.turn(revolution, Motor.ANTICLOCKWISE)
+    time.sleep(1)
+
+    print ("Motor A Clockwise Sixteenth step")
+    revolution = motora.setStepSize(Motor.SIXTEENTH)
+    motora.turn(revolution/2, Motor.CLOCKWISE)
+    time.sleep(1)
+
+    # Turn to a specific position
+    print ("Motor A goto specific positions")
+    revolution = motora.setStepSize(Motor.FULL)
+    for pos in (50, 100, 75, 50):
+        print ("  Goto",pos,"revoution",revolution)
+        motora.goto(pos)
+        time.sleep(0.5)
+    time.sleep(2)
+
+    print ("Motor A go CLOCKWISE in 16 x 12 steps")
+    revolution = motora.setStepSize(Motor.FULL)
+    step = 12
+    x = range(12, 200-step, step)
+    for n in x: 
+        print("  Goto position",n)
+        motora.goto(n)
+        time.sleep(0.5)
+      
+    print ("Motor A Go to position 100")
+    motora.goto(100,motora.FULL)
+    time.sleep(2)
+    print ("Motor A Go to position 1")
+    motora.goto(1,motora.FULL)
+    time.sleep(2)
 
     # Close the motor
     motora.reset()

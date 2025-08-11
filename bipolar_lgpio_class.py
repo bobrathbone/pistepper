@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# $Id: bipolar_lgpio_class.py,v 1.8 2025/08/08 10:29:22 bob Exp $
+# $Id: bipolar_lgpio_class.py,v 1.12 2025/08/11 16:29:31 bob Exp $
 # Raspberry Pi bipolar Stepper Motor Driver Class
 # Hardware Nema17 12 Volt Stepper High Torque Motor
 # Gear Reduction Ratio: 1/64 
@@ -34,6 +34,8 @@ SixteenthStep = [1,1,1,16]
 # Other definitions
 HIGH = 1
 LOW = 0
+ENABLE = LOW
+DISABLE = HIGH
 STEPS = 200 # 200 step motor (Full)
 
 class Motor:
@@ -74,6 +76,7 @@ class Motor:
         lgpio.gpio_claim_output(self.chip,self.ms1,lgpio.SET_PULL_UP)
         lgpio.gpio_claim_output(self.chip,self.ms2,lgpio.SET_PULL_UP)
         lgpio.gpio_claim_output(self.chip,self.ms3,lgpio.SET_PULL_UP)
+        lgpio.gpio_write(self.chip,self.enable,DISABLE)
         self.startPosition()
         self.setStepSize(self.FULL)
         return  
@@ -98,11 +101,19 @@ class Motor:
                 sys.exit(1)
         return chip
 
+    # Lock the motor in the current position
+    def lock(self):
+        lgpio.gpio_write(self.chip,self.enable,ENABLE)
+
+    # Unlock the motor (motor will get hot after a while) 
+    def unlock(self):
+        lgpio.gpio_write(self.chip,self.enable,DISABLE)
+
     # Reset (stop) motor
     def reset(self):
         lgpio.gpio_write(self.chip,self.step,LOW)
         lgpio.gpio_write(self.chip,self.direction,LOW)
-        lgpio.gpio_write(self.chip,self.enable,LOW)
+        lgpio.gpio_write(self.chip,self.enable,DISABLE)
         lgpio.gpio_write(self.chip,self.ms1,LOW)
         lgpio.gpio_write(self.chip,self.ms2,LOW)
         lgpio.gpio_write(self.chip,self.ms3,LOW)
@@ -123,14 +134,13 @@ class Motor:
                   (steps,self.sDirection[direction],self.oneRevolution,self.position))
         count = steps
         lgpio.gpio_write(self.chip,self.direction,direction)
-        lgpio.gpio_write(self.chip,self.enable,HIGH)
+        lgpio.gpio_write(self.chip,self.enable,ENABLE)
         while count > 0:
             lgpio.gpio_write(self.chip,self.step,HIGH)
             time.sleep(self.pulse)
             lgpio.gpio_write(self.chip,self.step,LOW)
             time.sleep(self.interval)
             count -= 1
-        lgpio.gpio_write(self.chip,self.enable,LOW)
 
         # Calculate new position
         if direction == self.CLOCKWISE:
@@ -226,27 +236,42 @@ class Motor:
 
 # Test routine
 if __name__ == '__main__':
+
+    # GPIO assignments for 26-pin header for older Raspberry Pi's
+    '''
+    step = 24
+    direction = 4
+    enable = 25
+    ms1 = 23
+    ms2 = 22
+    ms3 = 27
+    '''
+
     # 40 pin header for newer Raspberry Pi's
     step = 21
     direction = 20
-    enable = 25     # Not necessarily required (connect to control enable pin)
+    enable = 25   
     ms1 = 18
     ms2 = 15
     ms3 = 14
+
     motora = Motor(step,direction,enable,ms1,ms2,ms3) 
     print("Test Neva17 bipolar motor")
     print("GPIO settings")
+    print("  step",step)
     print("  direction",direction)
     print("  enable",enable)
     print("  ms1",ms1)
     print("  ms2",ms2)
     print("  ms3",ms3)
 
-    # Initialise motor (Sets current position as 0)
+    time.sleep(2)
+
+    # Initialise motor (Sets current position to 1)
     motora.init()
 
     # Set debug to True or False
-    motora.setDebug(True)
+    motora.setDebug(False)
 
     # Set the motor to step size FULL (1) 
     print ("Motor A Clockwise FULL step")
@@ -283,10 +308,12 @@ if __name__ == '__main__':
     print ("Motor A go CLOCKWISE in 16 x 12 steps")
     revolution = motora.setStepSize(Motor.FULL)
     step = 12
-    x = range(12, 200-step, step)
-    for n in x: 
-        print("  Goto position",n)
-        motora.goto(n)
+    count = 1
+    x = range(12, 200, step)
+    for pos in x: 
+        print("  %d Goto position %d" % (count,pos))
+        motora.goto(pos)
+        count += 1
         time.sleep(0.5)
       
     print ("Motor A Go to position 100")
@@ -294,11 +321,18 @@ if __name__ == '__main__':
     time.sleep(2)
     print ("Motor A Go to position 1")
     motora.goto(1,motora.FULL)
-    time.sleep(2)
+
+    print("Unlock motora")
+    motora.unlock()
+    time.sleep(4)
+    print("Lock motora")
+    motora.lock()
+    time.sleep(6)
 
     # Close the motor
     motora.reset()
     motora.close()
+    print ("Motor A end of test")
 # End of test program
 
 # set tabstop=4 shiftwidth=4 expandtab

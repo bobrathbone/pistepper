@@ -2,7 +2,7 @@
 #
 # Raspberry Pi Unipolar Stepper Motor test bipolar_class.py
 # Author : Bob Rathbone
-# $Id: test_26_nema17.py,v 1.3 2023/05/30 16:44:49 bob Exp $
+# $Id: test_26_nema17.py,v 1.4 2025/08/09 11:13:04 bob Exp $
 # Site   : http://www.bobrathbone.com
 #
 # NEMA-17 unipolar stepper motor test 
@@ -11,7 +11,10 @@
 import os
 import time
 import atexit
-from bipolar_class import Motor
+
+from bipolar_lgpio_class import Motor   # Uses LGPIO library
+# This program can also be used with RPi GPIO. Comment out previous lie and uncomment next
+#from bipolar_class import Motor    # Usses RPi.GPIO library
 
 # NEMA-17 Unipolar Motor BCM GPIO definitions
 # Comment out the incorrect definition and un-comment the correct one 
@@ -37,45 +40,58 @@ ms3 = 14
 motora = Motor(step,direction,enable,ms1,ms2,ms3)
 motora.init()
 
-def finish():
-	motora.stop()
-	return
-
-atexit.register(finish)
-
 # Get the number of steps per revoltion
-count = 3
-while count > 0:
-	print ("Motor A Clockwise Full step")
-	revolution = motora.setStepSize(Motor.FULL)
-	motora.turn(revolution*3, Motor.CLOCKWISE)
-	count -= 1
-	time.sleep(1)
 
-count = 3
-while count > 0:
-	print ("Motor A Anticlockwise Full step")
-	revolution = motora.setStepSize(Motor.FULL)
-	motora.turn(revolution*1, Motor.ANTICLOCKWISE)
-	count -= 1
-	time.sleep(1)
+print ("Motor A Clockwise Full step")
+revolution = motora.setStepSize(Motor.FULL)
+motora.turn(revolution*3, Motor.CLOCKWISE)
+time.sleep(1)
 
-	print ("Motor A Clockwise Sixteenth step")
-	revolution = motora.setStepSize(Motor.SIXTEENTH)
-	motora.turn(revolution/2, Motor.CLOCKWISE)
-	time.sleep(1)
+print ("Motor A Anticlockwise Full step")
+revolution = motora.setStepSize(Motor.FULL)
+motora.turn(revolution*1, Motor.ANTICLOCKWISE)
+time.sleep(1)
 
+print ("Motor A Clockwise Sixteenth step")
+revolution = motora.setStepSize(Motor.SIXTEENTH)
+motora.turn(revolution/2, Motor.CLOCKWISE)
+time.sleep(1)
+
+revolution = motora.setStepSize(Motor.QUARTER)
 revolution = motora.getRevolution()
 print ("revolution = " + str(revolution))
-print (str(motora.goto(revolution/4)))
-time.sleep(2)
-print (str(motora.goto((revolution/4)*3)))
-time.sleep(2)
-print (str(motora.goto(revolution/2)))
-time.sleep(2)
+print("Goto",int(revolution/4))
+motora.goto(int(revolution/4))
+time.sleep(1)
+print("Goto",int(revolution*3/4))
+motora.goto(int(revolution*3/4))
+time.sleep(1)
+print("Goto",int(revolution/2))
+motora.goto(int(revolution/2))
+time.sleep(1)
+
+print ("Motor A go CLOCKWISE in 16 x 12 steps")
+revolution = motora.setStepSize(Motor.FULL)
+step = 12
+count = 1
+x = range(12, 200, step)
+for pos in x:
+    print("  %d Goto position %d" % (count,pos))
+    motora.goto(pos)
+    count += 1
+    time.sleep(0.5)
+
+print("Unlock motora")
+motora.unlock()
+time.sleep(4)
+print("Lock motora")
+motora.lock()
+time.sleep(4)
 
 # Reset motor otherwise it will become hot
 motora.reset()
+# Close the motor
+motora.close()
 
 # End of program
 

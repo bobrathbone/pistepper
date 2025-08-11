@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# $Id: bipolar_class.py,v 1.8 2025/08/05 07:00:11 bob Exp $
+# $Id: bipolar_class.py,v 1.9 2025/08/09 11:13:43 bob Exp $
 # Raspberry Pi bipolar Stepper Motor Driver Class
 # Hardware Nema17 12 Volt Stepper High Torque Motor
 # Gear Reduction Ratio: 1/64 
@@ -165,11 +165,17 @@ class Motor:
         self.oneRevolution = steps
         return self.oneRevolution
 
-
     # Get number of revolution steps
     def getRevolution(self):
         return self.oneRevolution
         
+    # Lock the motor in the current position
+    def lock(self):
+        lgpio.gpio_write(self.chip,self.enable,ENABLE)
+
+    # Unlock the motor (motor will get hot after a while)
+    def unlock(self):
+        lgpio.gpio_write(self.chip,self.enable,DISABLE)
 
 # End of Unipolar Motor class
 

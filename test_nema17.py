@@ -2,7 +2,7 @@
 #
 # Raspberry Pi bipolar Stepper Motor test bipolar_class.py
 # Author : Bob Rathbone
-# $Id: test_nema17.py,v 1.6 2023/05/30 16:44:49 bob Exp $
+# $Id: test_nema17.py,v 1.7 2025/08/11 09:06:27 bob Exp $
 # Site   : http://www.bobrathbone.com
 #
 # NEMA-17 bipolar stepper motor test 
@@ -11,7 +11,8 @@
 import os
 import time
 import atexit
-from bipolar_class import Motor
+from bipolar_lgpio_class import Motor
+#from bipolar_class import Motor
 
 # NEMA-17 bipolar Motor BCM GPIO definitions
 # Comment out the incorrect definition and un-comment the correct one 
@@ -65,14 +66,18 @@ while count > 0:
 	motora.turn(revolution/2, Motor.CLOCKWISE)
 	time.sleep(1)
 
+revolution = motora.setStepSize(Motor.QUARTER)
 revolution = motora.getRevolution()
 print ("revolution = " + str(revolution))
-print (str(motora.goto(revolution/4)))
-time.sleep(2)
-print (str(motora.goto((revolution/4)*3)))
-time.sleep(2)
-print (str(motora.goto(revolution/2)))
-time.sleep(2)
+print("Goto",int(revolution/4))
+motora.goto(int(revolution/4))
+time.sleep(1)
+print("Goto",int(revolution*3/4))
+motora.goto(int(revolution*3/4))
+time.sleep(1)
+print("Goto",int(revolution/2))
+motora.goto(int(revolution/2))
+time.sleep(1)
 
 # Reset the motor otherwise it will become hot
 motora.reset()

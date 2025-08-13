@@ -24,7 +24,10 @@ test_motor_i2c_class.py test_motor_i2c_class.py Unipolar    28BYJ-48 stepper mot
 test_position.py        unipolar_class.py       Unipolar    28BYJ-48 test position setting
 motord.py               motor_daemon.py         Unipolar    28BYJ-48 background daemon
 log_class.py            n/a                     n/a         Logging class for motord.py
-test_nema17.py          bipolar_class.py        Bipolar     Nema17 stepper motor driver
+test_nema17.py          bipolar_class.py        Bipolar     Nema17 stepper motor driver example
+control_nema17.py       bipolar_class.py        Bipolar     Nema17 motor rotary encoder control
+button_class.py         n/a                     n/a         Push Button class. See control_nema17.py
+rotary_class.py         n/a                     n/a         Rotary Encoder class.  "     " 
 test_26_ema17.py        bipolar_class.py        Bipolar     Nema17 driver 26-pin header
 See __main__ in class   bipolar_lgpio_class.py  Bipolar     Nema17 driver using Python3 lgpio
 test_motor_i2c_class.py motor_i2c_class.py      Unipolar    I2C 28BYJ-48 stepper dual motor driver

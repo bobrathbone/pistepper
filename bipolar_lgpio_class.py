@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# $Id: bipolar_lgpio_class.py,v 1.12 2025/08/11 16:29:31 bob Exp $
+# $Id: bipolar_lgpio_class.py,v 1.14 2025/08/13 09:08:07 bob Exp $
 # Raspberry Pi bipolar Stepper Motor Driver Class
 # Hardware Nema17 12 Volt Stepper High Torque Motor
 # Gear Reduction Ratio: 1/64 
@@ -55,6 +55,7 @@ class Motor:
     oneRevolution = STEPS # If FULL step size
     position = 1    # Current position (200 x stepsize)
     debug = False   # Print debug statements
+    halt = False    # Interrupt turn routine
 
     sDirection = ("CLOCKWISE","ANTICLOCKWISE")
 
@@ -77,8 +78,8 @@ class Motor:
         lgpio.gpio_claim_output(self.chip,self.ms2,lgpio.SET_PULL_UP)
         lgpio.gpio_claim_output(self.chip,self.ms3,lgpio.SET_PULL_UP)
         lgpio.gpio_write(self.chip,self.enable,DISABLE)
-        self.startPosition()
         self.setStepSize(self.FULL)
+        self.startPosition()
         return  
 
     # Open chip depending upon the Rasberry Pi model
@@ -101,8 +102,9 @@ class Motor:
                 sys.exit(1)
         return chip
 
-    # Lock the motor in the current position
+    # Lock the motor (also keeps motor warm)
     def lock(self):
+        self.halt = True    # Stop motor
         lgpio.gpio_write(self.chip,self.enable,ENABLE)
 
     # Unlock the motor (motor will get hot after a while) 
@@ -141,8 +143,12 @@ class Motor:
             lgpio.gpio_write(self.chip,self.step,LOW)
             time.sleep(self.interval)
             count -= 1
-
+            if self.halt:      # Check interrupt
+                steps = count
+                break
+    
         # Calculate new position
+        self.halt = False
         if direction == self.CLOCKWISE:
             self.position = self.position + steps 
             while self.position > self.oneRevolution:
@@ -157,7 +163,6 @@ class Motor:
 
     def interrupt(self):
         self.halt = True
-        return
 
     def close(self):
         lgpio.gpiochip_close(self.chip)
@@ -201,12 +206,12 @@ class Motor:
 
     # Stop the motor (calls reset)
     def stop(self):
-        self.reset()    
-        return
+        self.halt = True
+        self.lock()    
 
-    # Lock the motor (also keeps motor warm)
-    def lock(self):
-        return  
+    # Set the position counter
+    def setPosition(self,pos=1):
+        self.position = pos 
 
     # Set Step size
     def setStepSize(self,size):
@@ -314,6 +319,9 @@ if __name__ == '__main__':
         print("  %d Goto position %d" % (count,pos))
         motora.goto(pos)
         count += 1
+        if count > 12:
+            motora.stop()
+            break
         time.sleep(0.5)
       
     print ("Motor A Go to position 100")

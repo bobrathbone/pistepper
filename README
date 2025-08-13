@@ -3,6 +3,7 @@ Raspberry Pi Stepper Motor Project
 
 Date            Version     Details
 ----            -------     -------
+13 August 2025  2.4         Added button and rotary encoder controls (demo)
 3 August 2025   2.3         bipolar_class.py (RPi.GPIO) converted to bipolar_lgpio_class.py
 29 July 2025    2.2         Installation acomplished using GitHub repository
 28 May 2023     2.1         Corrected GPIO pin assignments for 40-pin header

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# $Id: bipolar_lgpio_class.py,v 1.14 2025/08/13 09:08:07 bob Exp $
+# $Id: bipolar_lgpio_class.py,v 1.15 2025/08/16 09:02:23 bob Exp $
 # Raspberry Pi bipolar Stepper Motor Driver Class
 # Hardware Nema17 12 Volt Stepper High Torque Motor
 # Gear Reduction Ratio: 1/64 
@@ -208,6 +208,11 @@ class Motor:
     def stop(self):
         self.halt = True
         self.lock()    
+
+    # Start the motor 
+    def start(self):
+        self.halt = False
+        self.unlock()    
 
     # Set the position counter
     def setPosition(self,pos=1):

@@ -2,7 +2,7 @@
 #
 # Raspberry Pi bipolar Stepper Motor test bipolar_class.py
 # Author : Bob Rathbone
-# $Id: control_nema17.py,v 1.4 2025/08/13 10:02:02 bob Exp $
+# $Id: control_nema17.py,v 1.6 2025/08/16 11:36:09 bob Exp $
 # Site   : http://www.bobrathbone.com
 #
 # NEMA-17 bipolar stepper motor test 
@@ -12,8 +12,10 @@
 import os,sys
 import time
 import atexit
+import RPi.GPIO as GPIO
 from bipolar_lgpio_class import Motor
 from rotary_class import RotaryEncoder
+from button_class import Button
 
 # NEMA-17 bipolar Motor BCM GPIO definitions
 step = 21
@@ -25,7 +27,8 @@ ms3 = 14
 
 position = 1
 button = None
-revolution = 0
+revolution = 0  # Number of steps in a revolution (Step size dependent)
+halt = False    # Local flag to break out of any loop if running
 
 Names = ['NO_EVENT', 'CLOCKWISE', 'ANTICLOCKWISE', 'BUTTON DOWN', 'BUTTON UP']
 
@@ -39,7 +42,7 @@ def rotary_event(event):
         name = 'ERROR'
 
     steps = 1
-
+    revolution = motora.setStepSize(Motor.FULL)
     print("Rotary event ", event, name)
     if event == 1 :
         motora.turn(steps, Motor.CLOCKWISE)
@@ -58,6 +61,13 @@ def rotary_event(event):
             motora.goto(position)
     #print("Position", motora.getPosition())
 
+def limit_event(event):
+    global halt
+    if limit_button.pressed():
+        print("Limit switch event",event,"pressed")
+        motora.stop()   # Stops the motor 
+        halt = True     # The halt flag is used to exit any loops
+
 print("Test Neva17 bipolar motor")
 print("Motor GPIO settings")
 print("  step",step)
@@ -74,13 +84,29 @@ print("Rotary encoder")
 print("  Rotary SIA signal GPIO", sia)
 print("  Rotary SIB signal GPIO", sib)
 print("  Rotary Knob button GPIO", knob_switch)
-
 rotaryknob = RotaryEncoder(sia,sib,knob_switch, rotary_event)
+ 
+limit_switch = 26
+print("  Limit switch GPIO", limit_switch)
+limit_button = Button(limit_switch,limit_event,GPIO.PUD_UP)
 
 motora = Motor(step,direction,enable,ms1,ms2,ms3)
 motora.init()
 motora.unlock()
 revolution = motora.setStepSize(Motor.FULL)
+
+count = 20
+while count > 0:
+    print ("Motor A Clockwise Sixteenth step")
+    motora.setStepSize(Motor.SIXTEENTH)
+    motora.turn(revolution, Motor.CLOCKWISE)
+    count -= 1
+    if halt:
+        motora.stop()
+        halt = False
+        break
+
+motora.setDebug(False)  # Set to True for debug
 
 try:
     while True:

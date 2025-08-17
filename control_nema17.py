@@ -2,7 +2,7 @@
 #
 # Raspberry Pi bipolar Stepper Motor test bipolar_class.py
 # Author : Bob Rathbone
-# $Id: control_nema17.py,v 1.6 2025/08/16 11:36:09 bob Exp $
+# $Id: control_nema17.py,v 1.7 2025/08/17 08:48:25 bob Exp $
 # Site   : http://www.bobrathbone.com
 #
 # NEMA-17 bipolar stepper motor test 
@@ -14,8 +14,8 @@ import time
 import atexit
 import RPi.GPIO as GPIO
 from bipolar_lgpio_class import Motor
-from rotary_class import RotaryEncoder
-from button_class import Button
+from rotary_class_gpiozero import RotaryEncoderClass
+from button_class_gpiozero import ButtonClass
 
 # NEMA-17 bipolar Motor BCM GPIO definitions
 step = 21
@@ -84,11 +84,11 @@ print("Rotary encoder")
 print("  Rotary SIA signal GPIO", sia)
 print("  Rotary SIB signal GPIO", sib)
 print("  Rotary Knob button GPIO", knob_switch)
-rotaryknob = RotaryEncoder(sia,sib,knob_switch, rotary_event)
+rotaryknob = RotaryEncoderClass(sia,sib,knob_switch,rotary_event)
  
 limit_switch = 26
 print("  Limit switch GPIO", limit_switch)
-limit_button = Button(limit_switch,limit_event,GPIO.PUD_UP)
+limit_button = ButtonClass(limit_switch,limit_event,GPIO.PUD_UP)
 
 motora = Motor(step,direction,enable,ms1,ms2,ms3)
 motora.init()

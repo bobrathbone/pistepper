@@ -3,7 +3,7 @@ Raspberry Pi Stepper Motor Project
 
 Date            Version     Details
 ----            -------     -------
-16 August 2025  2.5 	    Limit switch detection added
+17 August 2025  2.5 	    Limit switches detection added
 13 August 2025  2.4         Added button and rotary encoder controls (demo)
 3 August 2025   2.3         bipolar_class.py (RPi.GPIO) converted to bipolar_lgpio_class.py
 29 July 2025    2.2         Installation acomplished using GitHub repository

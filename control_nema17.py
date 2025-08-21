@@ -2,7 +2,7 @@
 #
 # Raspberry Pi bipolar Stepper Motor test bipolar_class.py
 # Author : Bob Rathbone
-# $Id: control_nema17.py,v 1.7 2025/08/17 08:48:25 bob Exp $
+# $Id: control_nema17.py,v 1.8 2025/08/18 07:52:00 bob Exp $
 # Site   : http://www.bobrathbone.com
 #
 # NEMA-17 bipolar stepper motor test 
@@ -19,7 +19,7 @@ from button_class_gpiozero import ButtonClass
 
 # NEMA-17 bipolar Motor BCM GPIO definitions
 step = 21
-direction = 20
+direction = 20  # Direction signal GPIO
 enable = 25    
 ms1 = 18
 ms2 = 15
@@ -95,11 +95,11 @@ motora.init()
 motora.unlock()
 revolution = motora.setStepSize(Motor.FULL)
 
-count = 20
+count = 10
 while count > 0:
     print ("Motor A Clockwise Sixteenth step")
-    motora.setStepSize(Motor.SIXTEENTH)
-    motora.turn(revolution, Motor.CLOCKWISE)
+    revolution = motora.setStepSize(Motor.SIXTEENTH)
+    motora.turn(revolution, Motor.ANTICLOCKWISE)
     count -= 1
     if halt:
         motora.stop()

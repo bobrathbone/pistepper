@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #
-# $Id: unipolar_class.py,v 1.7 2023/05/23 09:20:02 bob Exp $
+# $Id: unipolar_class.py,v 1.8 2025/08/21 10:12:23 bob Exp $
 # Raspberry Pi Bipolar Stepper Motor Driver Class
-# Typical hardware 28BYJ-48 Stepper motor
+# Typical hardware 28BYJ-48 Stepper motor.
 # Gear Reduction Ratio: 1/64 
 # Step Torque Angle: 5.625 degrees /64
 # 360/5.625 = 64

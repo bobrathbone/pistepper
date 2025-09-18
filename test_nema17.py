@@ -2,7 +2,7 @@
 #
 # Raspberry Pi bipolar Stepper Motor test bipolar_class.py
 # Author : Bob Rathbone
-# $Id: test_nema17.py,v 1.7 2025/08/11 09:06:27 bob Exp $
+# $Id: test_nema17.py,v 1.8 2025/08/29 15:06:49 bob Exp $
 # Site   : http://www.bobrathbone.com
 #
 # NEMA-17 bipolar stepper motor test 
@@ -37,12 +37,6 @@ ms3 = 14
 
 motora = Motor(step,direction,enable,ms1,ms2,ms3)
 motora.init()
-
-def finish():
-	motora.stop()
-	return
-
-atexit.register(finish)
 
 # Get the number of steps per revoltion
 count = 3

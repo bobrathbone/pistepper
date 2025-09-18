@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# $Id: bipolar_class.py,v 1.9 2025/08/09 11:13:43 bob Exp $
+# $Id: bipolar_class.py,v 1.11 2025/09/18 08:58:42 bob Exp $
 # Raspberry Pi bipolar Stepper Motor Driver Class
 # Hardware Nema17 12 Volt Stepper High Torque Motor
 # Gear Reduction Ratio: 1/64 
@@ -46,6 +46,7 @@ class Motor:
     pulse=0.0007
     interval=0.0007
     oneRevolution = STEPS
+    _reverse = False  # Reverse motor polarity (if cable crossed over)
 
     def __init__(self, step, direction, enable, ms1, ms2, ms3):
         self.step = step
@@ -70,6 +71,13 @@ class Motor:
         self.setStepSize(self.FULL)
         return  
 
+    # Reverse motor polarity
+    def reverse(self,_reverse=False):
+        self._reverse = _reverse
+
+    def isReversed(self):
+        return self._reverse
+
     # Reset (stop) motor
     def reset(self):
         GPIO.output(self.step,GPIO.LOW)
@@ -89,7 +97,15 @@ class Motor:
         return self.oneRevolution
 
     # Turn the motor
-    def turn(self,steps,direction):
+    def turn(self,steps,motor_dir):
+
+        if self._reverse:   # Reverse motor polarity
+            if motor_dir == self.CLOCKWISE:
+                motor_dir = self.ANTICLOCKWISE
+            elif motor_dir == self.ANTICLOCKWISE:
+                motor_dir = self.CLOCKWISE
+        GPIO.output(self.direction,motor_dir)
+
         count = steps
         GPIO.output(self.enable,ENABLE)
         while count > 0:
@@ -105,9 +121,17 @@ class Motor:
         self.halt = True
         return
 
-    # set current position as 0 
+    # set current position as 1 
     def zeroPosition(self):
-        self.position = 0
+        self.position = 1
+        return self.position
+
+    # Set starting position (1)
+    def startPosition(self):
+        self.position = 1
+        return self.position
+
+    def getPosition(self):
         return self.position
 
     # Goto a specific position
@@ -142,11 +166,14 @@ class Motor:
     # Stop the motor (calls reset)
     def stop(self):
         self.reset()    
-        return
 
     # Lock the motor (also keeps motor warm)
     def lock(self):
-        return  
+        GPIO.output(self.enable,ENABLE)
+
+    # Lock the motor (also keeps motor warm)
+    def unlock(self):
+        GPIO.output(self.enable,DISABLE)
 
     # Set Step size
     def setStepSize(self,size):
@@ -171,11 +198,68 @@ class Motor:
         
     # Lock the motor in the current position
     def lock(self):
-        lgpio.gpio_write(self.chip,self.enable,ENABLE)
+        GPIO.setup(self.enable,GPIO.OUT)
 
     # Unlock the motor (motor will get hot after a while)
     def unlock(self):
-        lgpio.gpio_write(self.chip,self.enable,DISABLE)
+        GPIO.setup(self.enable,GPIO.OUT)
 
 # End of Unipolar Motor class
+
+# Test routine
+if __name__ == '__main__':
+
+    # GPIO assignments for 26-pin header for older Raspberry Pi's
+    '''
+    step = 24
+    direction = 4
+    enable = 25
+    ms1 = 23
+    ms2 = 22
+    ms3 = 27
+    '''
+
+    # 40 pin header for newer Raspberry Pi's
+    step = 21
+    direction = 20
+    enable = 25
+    ms1 = 18
+    ms2 = 15
+    ms3 = 14
+
+    motora = Motor(step,direction,enable,ms1,ms2,ms3)
+    print("Test Neva17 bipolar motor")
+    print("GPIO settings")
+    print("  step",step)
+    print("  direction",direction)
+    print("  enable",enable)
+    print("  ms1",ms1)
+    print("  ms2",ms2)
+    print("  ms3",ms3)
+
+    time.sleep(2)
+
+    # Initialise motor (Sets current position to 1)
+    motora.init()
+    #motora.reverse(True)   # Uncomment to reverse motor polarity
+
+    # Set the motor to step size FULL (1)
+    print ("Motor A Clockwise FULL step")
+    revolution = motora.setStepSize(Motor.FULL)
+    motora.turn(revolution, Motor.CLOCKWISE)
+    time.sleep(2)
+
+    print ("Motor A Anti-clockwise FULL step")
+    motora.turn(revolution, Motor.ANTICLOCKWISE)
+    time.sleep(2)
+
+    # Close the motor
+    motora.reset()
+    motora.unlock()
+    print ("Motor A end of test")
+
+# End of test program
+
+# set tabstop=4 shiftwidth=4 expandtab
+# retab
 

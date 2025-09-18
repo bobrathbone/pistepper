@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# $Id: bipolar_lgpio_class.py,v 1.16 2025/08/17 15:19:51 bob Exp $
+# $Id: bipolar_lgpio_class.py,v 1.20 2025/09/17 15:09:47 bob Exp $
 # Raspberry Pi bipolar Stepper Motor Driver Class
 # Hardware Nema17 12 Volt Stepper High Torque Motor
 # Gear Reduction Ratio: 1/64 
@@ -30,6 +30,7 @@ HalfStep = [1,0,0,2]
 QuarterStep = [0,1,0,4]
 EighthStep = [1,1,0,8]
 SixteenthStep = [1,1,1,16]
+ThirtySecondth = [1,0,1,32]    # DRV8825 H-Circuit onLy
 
 # Other definitions
 HIGH = 1
@@ -49,6 +50,7 @@ class Motor:
     QUARTER = 4     # 800 steps
     EIGHTH = 8      # 1600 steps
     SIXTEENTH = 16  # 3200 steps
+    THIRTYSECONDTH = 32  # 6400 steps DRV8825 H-Circuit only
 
     pulse=0.0007
     interval=0.0007
@@ -56,6 +58,7 @@ class Motor:
     position = 1    # Current position (200 x stepsize)
     debug = False   # Print debug statements
     halt = False    # Interrupt turn routine
+    _reverse = False  # Reverse motor polarity (if cable crossed over)
 
     sDirection = ("CLOCKWISE","ANTICLOCKWISE")
 
@@ -81,6 +84,13 @@ class Motor:
         self.setStepSize(self.FULL)
         self.startPosition()
         return  
+
+    # Reverse motor polarity
+    def reverse(self,_reverse=False):
+        self._reverse = _reverse 
+
+    def isReversed(self):
+        return self._reverse
 
     # Open chip depending upon the Rasberry Pi model
     def get_chip(self): 
@@ -131,6 +141,13 @@ class Motor:
 
     # Turn the motor
     def turn(self,steps,direction):
+
+        if self._reverse:   # Reverse motor polarity
+            if direction == 0:
+                direction = 1
+            elif direction == 1:
+                direction = 0
+
         if self.debug:
             print("Turn steps=%d %s revolution=%d position=%d" % 
                   (steps,self.sDirection[direction],self.oneRevolution,self.position))
@@ -173,8 +190,9 @@ class Motor:
         return self.position
 
     # Goto a specific position
-    def goto(self,position=0,stepsize=FULL):
-        self.setStepSize(stepsize)
+    def goto(self,position=1,stepsize=None):
+        if stepsize != None:
+            self.setStepSize(stepsize)
         newpos = position
         while newpos > self.oneRevolution:
             newpos -= self.oneRevolution
@@ -226,6 +244,8 @@ class Motor:
             steps = self.setStepResolution(EighthStep)  
         elif size == self.SIXTEENTH:
             steps = self.setStepResolution(SixteenthStep)   
+        elif size == self.THIRTYSECONDTH:
+            steps = self.setStepResolution(ThirtySecondth)   # DRV8825 only
         else:
             steps = self.setStepResolution(FullStep)    
 
